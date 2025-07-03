@@ -140,7 +140,11 @@ class CartManager {
       if (cartItemsList) {
         cartItemsList.innerHTML = cartHTML;
       }
-      cartTotal.textContent = `৳${this.getTotal()}`;
+      
+      // Add explicit null check for cartTotal before setting textContent
+      if (cartTotal) {
+        cartTotal.textContent = `৳${this.getTotal()}`;
+      }
     }
   }
 
