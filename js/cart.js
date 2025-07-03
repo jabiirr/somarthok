@@ -136,7 +136,10 @@ class CartManager {
         </div>
       `).join('');
       
-      cartItemsList.innerHTML = cartHTML;
+      // Additional null check before setting innerHTML
+      if (cartItemsList) {
+        cartItemsList.innerHTML = cartHTML;
+      }
       cartTotal.textContent = `৳${this.getTotal()}`;
     }
   }
