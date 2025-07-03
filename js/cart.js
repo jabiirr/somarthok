@@ -74,6 +74,9 @@ class CartManager {
   // Update cart badge
   updateCartBadge() {
     const badge = document.getElementById('cart-badge');
+    
+    if (!badge) return; // Add null check
+    
     const count = this.getItemCount();
     
     if (count > 0) {
@@ -154,6 +157,8 @@ class CartManager {
     const toast = document.getElementById('success-toast');
     const toastMessage = document.getElementById('toast-message');
     
+    if (!toast || !toastMessage) return; // Add null checks
+    
     toastMessage.textContent = message;
     toast.classList.remove('translate-x-full');
     
@@ -170,66 +175,83 @@ class CartManager {
   }
 }
 
-// Initialize cart manager
-const cartManager = new CartManager();
+// Declare cartManager globally
+let cartManager;
 
-// Cart functions
-function openCart() {
-  document.getElementById('cart-overlay').style.display = 'block';
-  document.getElementById('cart-sidebar').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
+// Wait for DOM to be fully loaded before initializing
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize cart manager
+  cartManager = new CartManager();
 
-function closeCart() {
-  document.getElementById('cart-overlay').style.display = 'none';
-  document.getElementById('cart-sidebar').classList.remove('open');
-  document.body.style.overflow = 'auto';
-}
-
-function addToCart(productId, productName, productPrice, productImage) {
-  const product = {
-    id: productId,
-    name: productName,
-    price: parseInt(productPrice),
-    image: productImage
+  // Cart functions
+  window.openCart = function() {
+    const cartOverlay = document.getElementById('cart-overlay');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    
+    if (cartOverlay && cartSidebar) {
+      cartOverlay.style.display = 'block';
+      cartSidebar.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
   };
-  
-  cartManager.addToCart(product);
-}
 
-function checkout() {
-  if (cartManager.cart.length === 0) {
-    alert('Your cart is empty!');
-    return;
-  }
+  window.closeCart = function() {
+    const cartOverlay = document.getElementById('cart-overlay');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    
+    if (cartOverlay && cartSidebar) {
+      cartOverlay.style.display = 'none';
+      cartSidebar.classList.remove('open');
+      document.body.style.overflow = 'auto';
+    }
+  };
 
-  const total = cartManager.getTotal();
-  const itemCount = cartManager.getItemCount();
-  
-  // Simple checkout simulation
-  const confirmed = confirm(`Proceed with checkout?\n\nTotal: ৳${total}\nItems: ${itemCount}\n\nThis will redirect you to our payment partner.`);
-  
-  if (confirmed) {
-    // In a real application, this would redirect to a payment gateway
-    alert('Thank you for your order! You will be redirected to our payment partner.\n\nFor now, this is a demo - your cart will be cleared.');
-    cartManager.clearCart();
-    closeCart();
-  }
-}
+  window.addToCart = function(productId, productName, productPrice, productImage) {
+    const product = {
+      id: productId,
+      name: productName,
+      price: parseInt(productPrice),
+      image: productImage
+    };
+    
+    cartManager.addToCart(product);
+  };
 
-// Close cart when clicking outside
-document.addEventListener('click', function(event) {
-  const cartSidebar = document.getElementById('cart-sidebar');
-  const cartButton = event.target.closest('[onclick*="openCart"]');
-  
-  if (!cartSidebar.contains(event.target) && !cartButton && cartSidebar.classList.contains('open')) {
-    closeCart();
-  }
-});
+  window.checkout = function() {
+    if (cartManager.cart.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
 
-// Close cart with Escape key
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape' && document.getElementById('cart-sidebar').classList.contains('open')) {
-    closeCart();
-  }
+    const total = cartManager.getTotal();
+    const itemCount = cartManager.getItemCount();
+    
+    // Simple checkout simulation
+    const confirmed = confirm(`Proceed with checkout?\n\nTotal: ৳${total}\nItems: ${itemCount}\n\nThis will redirect you to our payment partner.`);
+    
+    if (confirmed) {
+      // In a real application, this would redirect to a payment gateway
+      alert('Thank you for your order! You will be redirected to our payment partner.\n\nFor now, this is a demo - your cart will be cleared.');
+      cartManager.clearCart();
+      closeCart();
+    }
+  };
+
+  // Close cart when clicking outside
+  document.addEventListener('click', function(event) {
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const cartButton = event.target.closest('[onclick*="openCart"]');
+    
+    if (cartSidebar && !cartSidebar.contains(event.target) && !cartButton && cartSidebar.classList.contains('open')) {
+      closeCart();
+    }
+  });
+
+  // Close cart with Escape key
+  document.addEventListener('keydown', function(event) {
+    const cartSidebar = document.getElementById('cart-sidebar');
+    if (event.key === 'Escape' && cartSidebar && cartSidebar.classList.contains('open')) {
+      closeCart();
+    }
+  });
 });
