@@ -2,7 +2,10 @@
 class CartManager {
   constructor() {
     this.cart = this.loadCart();
-    this.updateCartUI();
+    // Delay UI update to ensure DOM is ready
+    setTimeout(() => {
+      this.updateCartUI();
+    }, 0);
   }
 
   // Load cart from localStorage
@@ -119,18 +122,18 @@ class CartManager {
             <p class="text-eco1 font-bold">৳${item.price}</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})" 
-                    class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition">
+            <button data-action="decrease" data-product-id="${item.id}" data-quantity="${item.quantity - 1}" 
+                    class="cart-quantity-btn w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition">
               <i class="fa-solid fa-minus text-sm"></i>
             </button>
             <span class="w-8 text-center font-semibold">${item.quantity}</span>
-            <button onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})" 
-                    class="w-8 h-8 rounded-full bg-eco1 hover:bg-eco3 text-white flex items-center justify-center transition">
+            <button data-action="increase" data-product-id="${item.id}" data-quantity="${item.quantity + 1}" 
+                    class="cart-quantity-btn w-8 h-8 rounded-full bg-eco1 hover:bg-eco3 text-white flex items-center justify-center transition">
               <i class="fa-solid fa-plus text-sm"></i>
             </button>
           </div>
-          <button onclick="removeFromCartById('${item.id}')" 
-                  class="text-red-500 hover:text-red-700 transition ml-2">
+          <button data-action="remove" data-product-id="${item.id}" 
+                  class="cart-remove-btn text-red-500 hover:text-red-700 transition ml-2">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
@@ -139,6 +142,9 @@ class CartManager {
       // Additional null check before setting innerHTML
       if (cartItemsList) {
         cartItemsList.innerHTML = cartHTML;
+        
+        // Attach event listeners to cart buttons
+        this.attachCartEventListeners();
       }
       
       // Add explicit null check for cartTotal before setting textContent
@@ -146,6 +152,26 @@ class CartManager {
         cartTotal.textContent = `৳${this.getTotal()}`;
       }
     }
+  }
+
+  // Attach event listeners to cart buttons
+  attachCartEventListeners() {
+    // Quantity buttons
+    document.querySelectorAll('.cart-quantity-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const productId = e.currentTarget.dataset.productId;
+        const quantity = parseInt(e.currentTarget.dataset.quantity);
+        this.updateQuantity(productId, quantity);
+      });
+    });
+
+    // Remove buttons
+    document.querySelectorAll('.cart-remove-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const productId = e.currentTarget.dataset.productId;
+        this.removeFromCart(productId);
+      });
+    });
   }
 
   // Show success toast
@@ -169,6 +195,27 @@ class CartManager {
     this.saveCart();
     this.updateCartUI();
   }
+
+  // Checkout function
+  checkout() {
+    if (this.cart.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+
+    const total = this.getTotal();
+    const itemCount = this.getItemCount();
+    
+    // Simple checkout simulation
+    const confirmed = confirm(`Proceed with checkout?\n\nTotal: ৳${total}\nItems: ${itemCount}\n\nThis will redirect you to our payment partner.`);
+    
+    if (confirmed) {
+      // In a real application, this would redirect to a payment gateway
+      alert('Thank you for your order! You will be redirected to our payment partner.\n\nFor now, this is a demo - your cart will be cleared.');
+      this.clearCart();
+      closeCart();
+    }
+  }
 }
 
 // Global cart manager variable
@@ -178,6 +225,16 @@ let cartManager;
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize cart manager
   cartManager = new CartManager();
+  
+  // Attach checkout button event listener
+  const checkoutBtn = document.getElementById('checkout-btn');
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', () => {
+      if (cartManager) {
+        cartManager.checkout();
+      }
+    });
+  }
 });
 
 // Global functions that can be called from HTML onclick attributes
@@ -200,64 +257,6 @@ function closeCart() {
     cartOverlay.style.display = 'none';
     cartSidebar.classList.remove('open');
     document.body.style.overflow = 'auto';
-  }
-}
-
-function addToCart(productId, productName, productPrice, productImage) {
-  // Ensure cartManager is initialized
-  if (!cartManager) {
-    console.error('Cart manager not initialized');
-    return;
-  }
-
-  const product = {
-    id: productId,
-    name: productName,
-    price: parseInt(productPrice),
-    image: productImage
-  };
-  
-  cartManager.addToCart(product);
-}
-
-function updateCartQuantity(productId, quantity) {
-  if (!cartManager) {
-    console.error('Cart manager not initialized');
-    return;
-  }
-  cartManager.updateQuantity(productId, quantity);
-}
-
-function removeFromCartById(productId) {
-  if (!cartManager) {
-    console.error('Cart manager not initialized');
-    return;
-  }
-  cartManager.removeFromCart(productId);
-}
-
-function checkout() {
-  if (!cartManager) {
-    console.error('Cart manager not initialized');
-    return;
-  }
-
-  if (cartManager.cart.length === 0) {
-    alert('Your cart is empty!');
-    return;
-  }
-
-  const total = cartManager.getTotal();
-  const itemCount = cartManager.getItemCount();
-  
-  // Simple checkout simulation
-  const confirmed = confirm(`Proceed with checkout?\n\nTotal: ৳${total}\nItems: ${itemCount}\n\nThis will redirect you to our payment partner.`);
-  
-  if (confirmed) {
-    // In a real application, this would redirect to a payment gateway
-    alert('Thank you for your order! You will be redirected to our payment partner.\n\nFor now, this is a demo - your cart will be cleared.');
-    cartManager.clearCart();
-    closeCart();
   }
 }
 

@@ -154,13 +154,40 @@ products.forEach((product, i) => {
     <h3 class="font-heading text-xl text-white mb-2">${product.name}</h3>
     <p class="text-white/90 text-center mb-4">${product.description}</p>
     <span class="bg-white/90 text-eco${(i%5)+1} font-bold px-4 py-1 rounded-full mb-3">৳${product.price}/${product.unit}</span>
-    <button onclick="addToCart('${product.id}', '${product.name}', '${product.price}', '${product.image}')" 
-            class="px-6 py-2 rounded-full bg-eco3 text-white font-semibold shadow hover:bg-eco4 transition-colors duration-200 hover:scale-105 transform">
+    <button class="add-to-cart-btn px-6 py-2 rounded-full bg-eco3 text-white font-semibold shadow hover:bg-eco4 transition-colors duration-200 hover:scale-105 transform" 
+            data-product-id="${product.id}" 
+            data-product-name="${product.name}" 
+            data-product-price="${product.price}" 
+            data-product-image="${product.image}">
       <i class="fa-solid fa-cart-plus mr-1"></i> Add to Cart
     </button>
   </div>`;
 });
 document.getElementById('products-list').innerHTML = productsHtml;
+
+// Attach event listeners to Add to Cart buttons after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait a bit more to ensure cartManager is initialized
+  setTimeout(() => {
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (!cartManager) {
+          console.error('Cart manager not initialized');
+          return;
+        }
+
+        const product = {
+          id: this.dataset.productId,
+          name: this.dataset.productName,
+          price: parseInt(this.dataset.productPrice),
+          image: this.dataset.productImage
+        };
+        
+        cartManager.addToCart(product);
+      });
+    });
+  }, 100);
+});
 
 // About Section
 document.getElementById('about-img').src = content.about_section.image_urls[0];
