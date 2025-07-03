@@ -144,12 +144,18 @@
         </button>
       </div>
       
-      <!-- Cart Items -->
-      <div id="cart-items" class="flex-1 overflow-y-auto p-6">
+      <!-- Cart Items Container -->
+      <div id="cart-items-container" class="flex-1 overflow-y-auto p-6">
+        <!-- Empty Cart Message -->
         <div id="empty-cart" class="text-center py-12">
           <i class="fa-solid fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
           <p class="text-gray-500 text-lg">Your cart is empty</p>
           <p class="text-gray-400">Add some eco-friendly products!</p>
+        </div>
+        
+        <!-- Cart Items List -->
+        <div id="cart-items-list" style="display: none;">
+          <!-- Cart items will be populated here -->
         </div>
       </div>
       

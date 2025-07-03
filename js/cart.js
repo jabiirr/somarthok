@@ -86,33 +86,35 @@ class CartManager {
 
   // Update cart sidebar
   updateCartSidebar() {
-    const cartItems = document.getElementById('cart-items');
+    const emptyCart = document.getElementById('empty-cart');
+    const cartItemsList = document.getElementById('cart-items-list');
     const cartFooter = document.getElementById('cart-footer');
     const cartTotal = document.getElementById('cart-total');
 
     if (this.cart.length === 0) {
-      cartItems.innerHTML = `
-        <div id="empty-cart" class="text-center py-12">
-          <i class="fa-solid fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
-          <p class="text-gray-500 text-lg">Your cart is empty</p>
-          <p class="text-gray-400">Add some eco-friendly products!</p>
-        </div>
-      `;
-      
-      // Re-fetch the empty-cart element after setting innerHTML
-      const emptyCart = document.getElementById('empty-cart');
+      // Show empty cart message, hide items list and footer
       if (emptyCart) {
         emptyCart.style.display = 'block';
       }
-      
+      if (cartItemsList) {
+        cartItemsList.style.display = 'none';
+      }
       if (cartFooter) {
         cartFooter.style.display = 'none';
       }
     } else {
+      // Hide empty cart message, show items list and footer
+      if (emptyCart) {
+        emptyCart.style.display = 'none';
+      }
+      if (cartItemsList) {
+        cartItemsList.style.display = 'block';
+      }
       if (cartFooter) {
         cartFooter.style.display = 'block';
       }
       
+      // Populate cart items
       const cartHTML = this.cart.map(item => `
         <div class="flex items-center gap-4 p-4 border-b border-gray-100">
           <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
@@ -138,7 +140,9 @@ class CartManager {
         </div>
       `).join('');
       
-      cartItems.innerHTML = cartHTML;
+      if (cartItemsList) {
+        cartItemsList.innerHTML = cartHTML;
+      }
       if (cartTotal) {
         cartTotal.textContent = `৳${this.getTotal()}`;
       }
