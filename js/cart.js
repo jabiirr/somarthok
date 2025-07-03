@@ -87,13 +87,10 @@ class CartManager {
   // Update cart sidebar
   updateCartSidebar() {
     const cartItems = document.getElementById('cart-items');
-    const emptyCart = document.getElementById('empty-cart');
     const cartFooter = document.getElementById('cart-footer');
     const cartTotal = document.getElementById('cart-total');
 
     if (this.cart.length === 0) {
-      emptyCart.style.display = 'block';
-      cartFooter.style.display = 'none';
       cartItems.innerHTML = `
         <div id="empty-cart" class="text-center py-12">
           <i class="fa-solid fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
@@ -101,9 +98,20 @@ class CartManager {
           <p class="text-gray-400">Add some eco-friendly products!</p>
         </div>
       `;
+      
+      // Re-fetch the empty-cart element after setting innerHTML
+      const emptyCart = document.getElementById('empty-cart');
+      if (emptyCart) {
+        emptyCart.style.display = 'block';
+      }
+      
+      if (cartFooter) {
+        cartFooter.style.display = 'none';
+      }
     } else {
-      emptyCart.style.display = 'none';
-      cartFooter.style.display = 'block';
+      if (cartFooter) {
+        cartFooter.style.display = 'block';
+      }
       
       const cartHTML = this.cart.map(item => `
         <div class="flex items-center gap-4 p-4 border-b border-gray-100">
@@ -131,7 +139,9 @@ class CartManager {
       `).join('');
       
       cartItems.innerHTML = cartHTML;
-      cartTotal.textContent = `৳${this.getTotal()}`;
+      if (cartTotal) {
+        cartTotal.textContent = `৳${this.getTotal()}`;
+      }
     }
   }
 
