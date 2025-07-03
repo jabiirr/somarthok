@@ -75,7 +75,7 @@ class CartManager {
   updateCartBadge() {
     const badge = document.getElementById('cart-badge');
     
-    if (!badge) return; // Add null check
+    if (!badge) return;
     
     const count = this.getItemCount();
     
@@ -94,28 +94,21 @@ class CartManager {
     const cartFooter = document.getElementById('cart-footer');
     const cartTotal = document.getElementById('cart-total');
 
+    // Add null checks for all elements
+    if (!emptyCart || !cartItemsList || !cartFooter || !cartTotal) {
+      return;
+    }
+
     if (this.cart.length === 0) {
       // Show empty cart message, hide items list and footer
-      if (emptyCart) {
-        emptyCart.style.display = 'block';
-      }
-      if (cartItemsList) {
-        cartItemsList.style.display = 'none';
-      }
-      if (cartFooter) {
-        cartFooter.style.display = 'none';
-      }
+      emptyCart.style.display = 'block';
+      cartItemsList.style.display = 'none';
+      cartFooter.style.display = 'none';
     } else {
       // Hide empty cart message, show items list and footer
-      if (emptyCart) {
-        emptyCart.style.display = 'none';
-      }
-      if (cartItemsList) {
-        cartItemsList.style.display = 'block';
-      }
-      if (cartFooter) {
-        cartFooter.style.display = 'block';
-      }
+      emptyCart.style.display = 'none';
+      cartItemsList.style.display = 'block';
+      cartFooter.style.display = 'block';
       
       // Populate cart items
       const cartHTML = this.cart.map(item => `
@@ -126,29 +119,25 @@ class CartManager {
             <p class="text-eco1 font-bold">৳${item.price}</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="cartManager.updateQuantity('${item.id}', ${item.quantity - 1})" 
+            <button onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})" 
                     class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition">
               <i class="fa-solid fa-minus text-sm"></i>
             </button>
             <span class="w-8 text-center font-semibold">${item.quantity}</span>
-            <button onclick="cartManager.updateQuantity('${item.id}', ${item.quantity + 1})" 
+            <button onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})" 
                     class="w-8 h-8 rounded-full bg-eco1 hover:bg-eco3 text-white flex items-center justify-center transition">
               <i class="fa-solid fa-plus text-sm"></i>
             </button>
           </div>
-          <button onclick="cartManager.removeFromCart('${item.id}')" 
+          <button onclick="removeFromCartById('${item.id}')" 
                   class="text-red-500 hover:text-red-700 transition ml-2">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
       `).join('');
       
-      if (cartItemsList) {
-        cartItemsList.innerHTML = cartHTML;
-      }
-      if (cartTotal) {
-        cartTotal.textContent = `৳${this.getTotal()}`;
-      }
+      cartItemsList.innerHTML = cartHTML;
+      cartTotal.textContent = `৳${this.getTotal()}`;
     }
   }
 
@@ -157,7 +146,7 @@ class CartManager {
     const toast = document.getElementById('success-toast');
     const toastMessage = document.getElementById('toast-message');
     
-    if (!toast || !toastMessage) return; // Add null checks
+    if (!toast || !toastMessage) return;
     
     toastMessage.textContent = message;
     toast.classList.remove('translate-x-full');
@@ -175,68 +164,98 @@ class CartManager {
   }
 }
 
-// Declare cartManager globally
+// Global cart manager variable
 let cartManager;
 
 // Wait for DOM to be fully loaded before initializing
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize cart manager
   cartManager = new CartManager();
+});
 
-  // Cart functions
-  window.openCart = function() {
-    const cartOverlay = document.getElementById('cart-overlay');
-    const cartSidebar = document.getElementById('cart-sidebar');
-    
-    if (cartOverlay && cartSidebar) {
-      cartOverlay.style.display = 'block';
-      cartSidebar.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
+// Global functions that can be called from HTML onclick attributes
+function openCart() {
+  const cartOverlay = document.getElementById('cart-overlay');
+  const cartSidebar = document.getElementById('cart-sidebar');
+  
+  if (cartOverlay && cartSidebar) {
+    cartOverlay.style.display = 'block';
+    cartSidebar.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeCart() {
+  const cartOverlay = document.getElementById('cart-overlay');
+  const cartSidebar = document.getElementById('cart-sidebar');
+  
+  if (cartOverlay && cartSidebar) {
+    cartOverlay.style.display = 'none';
+    cartSidebar.classList.remove('open');
+    document.body.style.overflow = 'auto';
+  }
+}
+
+function addToCart(productId, productName, productPrice, productImage) {
+  // Ensure cartManager is initialized
+  if (!cartManager) {
+    console.error('Cart manager not initialized');
+    return;
+  }
+
+  const product = {
+    id: productId,
+    name: productName,
+    price: parseInt(productPrice),
+    image: productImage
   };
+  
+  cartManager.addToCart(product);
+}
 
-  window.closeCart = function() {
-    const cartOverlay = document.getElementById('cart-overlay');
-    const cartSidebar = document.getElementById('cart-sidebar');
-    
-    if (cartOverlay && cartSidebar) {
-      cartOverlay.style.display = 'none';
-      cartSidebar.classList.remove('open');
-      document.body.style.overflow = 'auto';
-    }
-  };
+function updateCartQuantity(productId, quantity) {
+  if (!cartManager) {
+    console.error('Cart manager not initialized');
+    return;
+  }
+  cartManager.updateQuantity(productId, quantity);
+}
 
-  window.addToCart = function(productId, productName, productPrice, productImage) {
-    const product = {
-      id: productId,
-      name: productName,
-      price: parseInt(productPrice),
-      image: productImage
-    };
-    
-    cartManager.addToCart(product);
-  };
+function removeFromCartById(productId) {
+  if (!cartManager) {
+    console.error('Cart manager not initialized');
+    return;
+  }
+  cartManager.removeFromCart(productId);
+}
 
-  window.checkout = function() {
-    if (cartManager.cart.length === 0) {
-      alert('Your cart is empty!');
-      return;
-    }
+function checkout() {
+  if (!cartManager) {
+    console.error('Cart manager not initialized');
+    return;
+  }
 
-    const total = cartManager.getTotal();
-    const itemCount = cartManager.getItemCount();
-    
-    // Simple checkout simulation
-    const confirmed = confirm(`Proceed with checkout?\n\nTotal: ৳${total}\nItems: ${itemCount}\n\nThis will redirect you to our payment partner.`);
-    
-    if (confirmed) {
-      // In a real application, this would redirect to a payment gateway
-      alert('Thank you for your order! You will be redirected to our payment partner.\n\nFor now, this is a demo - your cart will be cleared.');
-      cartManager.clearCart();
-      closeCart();
-    }
-  };
+  if (cartManager.cart.length === 0) {
+    alert('Your cart is empty!');
+    return;
+  }
 
+  const total = cartManager.getTotal();
+  const itemCount = cartManager.getItemCount();
+  
+  // Simple checkout simulation
+  const confirmed = confirm(`Proceed with checkout?\n\nTotal: ৳${total}\nItems: ${itemCount}\n\nThis will redirect you to our payment partner.`);
+  
+  if (confirmed) {
+    // In a real application, this would redirect to a payment gateway
+    alert('Thank you for your order! You will be redirected to our payment partner.\n\nFor now, this is a demo - your cart will be cleared.');
+    cartManager.clearCart();
+    closeCart();
+  }
+}
+
+// Event listeners for cart interactions
+document.addEventListener('DOMContentLoaded', function() {
   // Close cart when clicking outside
   document.addEventListener('click', function(event) {
     const cartSidebar = document.getElementById('cart-sidebar');
